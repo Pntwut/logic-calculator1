@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เครื่องคิดเลขตรรกศาสตร์ขั้นสูง</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sarabun', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .calculator {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .display {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            font-size: 1.8em;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            cursor: text;
+            position: relative;
+        }
+
+        .display:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        .cursor {
+            position: absolute;
+            width: 2px;
+            height: 1.5em;
+            background: #3498db;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .display-content {
+            flex: 1;
+            position: relative;
+        }
+
+        .placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .result-display {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            font-family: 'Courier New', monospace;
+            display: none;
+        }
+
+        .result-display.show {
+            display: block;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .button {
+            padding: 15px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .btn-variable {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-variable:hover {
+            background: #2980b9;
+        }
+
+        .btn-operator {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-operator:hover {
+            background: #c0392b;
+        }
+
+        .btn-bracket {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-bracket:hover {
+            background: #e67e22;
+        }
+
+        .btn-clear {
+            background: #e67e22;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #d35400;
+        }
+
+        .btn-equals {
+            background: #27ae60;
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-equals:hover {
+            background: #229954;
+        }
+
+        .btn-toggle {
+            background: #34495e;
+            color: white;
+            grid-column: span 4;
+            margin-top: 10px;
+        }
+
+        .btn-toggle:hover {
+            background: #2c3e50;
+        }
+
+        .truth-table {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .truth-table.show {
+            display: block;
+        }
+
+        .truth-table h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+        }
+
+        td {
+            background: #f8f9fa;
+        }
+
+        .step-column {
+            background: #e8f4f8;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .true {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .false {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-style: italic;
+        }
+
+        .step-by-step {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .step {
+            margin: 5px 0;
+            padding: 5px;
+            background: #fff;
+            border-radius: 5px;
+            border-left: 4px solid #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 เครื่องคิดเลขตรรกศาสตร์ขั้นสูง</h1>
+        
+        <div class="main-container">
+            <div class="calculator">
+                <div class="display" id="display">พิมพ์สูตรตรรกศาสตร์ที่นี่...</div>
+                <div class="result-display" id="resultDisplay"></div>
+                
+                <div class="button-grid">
+                    <!-- ตัวแปร -->
+                    <button class="button btn-variable" onclick="addToDisplay('p')">p</button>
+                    <button class="button btn-variable" onclick="addToDisplay('q')">q</button>
+                    <button class="button btn-variable" onclick="addToDisplay('r')">r</button>
+                    <button class="button btn-variable" onclick="addToDisplay('s')">s</button>
+                    
+                    <!-- การดำเนินการ -->
+                    <button class="button btn-operator" onclick="addToDisplay('∧')" title="AND">∧</button>
+                    <button class="button btn-operator" onclick="addToDisplay('∨')" title="OR">∨</button>
+                    <button class="button btn-operator" onclick="addToDisplay('¬')" title="NOT">¬</button>
+                    <button class="button btn-operator" onclick="addToDisplay('→')" title="IMPLIES">→</button>
+                    
+                    <button class="button btn-operator" onclick="addToDisplay('↔')" title="IFF">↔</button>
+                    <button class="button btn-operator" onclick="addToDisplay('⊕')" title="XOR">⊕</button>
+                    <button class="button btn-bracket" onclick="addToDisplay('(')">(</button>
+                    <button class="button btn-bracket" onclick="addToDisplay(')')">)</button>
+                    
+                    <!-- ฟังก์ชัน -->
+                    <button class="button btn-clear" onclick="clearDisplay()">ล้าง</button>
+                    <button class="button btn-clear" onclick="backspace()">ลบ</button>
+                    <button class="button btn-equals" onclick="evaluateExpression()">= แสดงผล</button>
+                </div>
+                
+                <button class="button btn-toggle" onclick="toggleTruthTable()">
+                    <span id="toggleText">เปิดตารางค่าความจริง</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="truth-table" id="truthTable">
+            <h3>ตารางค่าความจริง พร้อมขั้นตอนการคำนวณ</h3>
+            <div class="table-container">
+                <table id="truthTableContent">
+                    <thead>
+                        <tr id="tableHeader"></tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExpression = '';
+        let truthTableVisible = false;
+
+        function addToDisplay(value) {
+            currentExpression += value;
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const display = document.getElementById('display');
+            display.textContent = currentExpression || 'พิมพ์สูตรตรรกศาสตร์ที่นี่...';
+        }
+
+        function clearDisplay() {
+            currentExpression = '';
+            updateDisplay();
+            document.getElementById('resultDisplay').classList.remove('show');
+            if (truthTableVisible) {
+                generateTruthTable();
+            }
+        }
+
+        function backspace() {
+            currentExpression = currentExpression.slice(0, -1);
+            updateDisplay();
+            if (truthTableVisible) {
+                generateTruthTable();
+            }
+        }
+
+        function evaluateExpression() {
+            if (!currentExpression) return;
+            
+            const resultDisplay = document.getElementById('resultDisplay');
+            const variables = extractVariables(currentExpression);
+            
+            if (variables.length === 0) {
+                resultDisplay.innerHTML = '<span class="error">ไม่พบตัวแปรในสูตร</span>';
+                resultDisplay.classList.add('show');
+                return;
+            }
+
+            try {
+                // แสดงผลการประเมินแบบสรุป
+                resultDisplay.innerHTML = `
+                    <div><strong>สูตร:</strong> ${currentExpression}</div>
+                    <div><strong>ตัวแปร:</strong> ${variables.join(', ')}</div>
+                    <div><strong>สถานะ:</strong> <span style="color: #27ae60;">พร้อมแสดงตารางค่าความจริง</span></div>
+                `;
+                resultDisplay.classList.add('show');
+                
+                if (truthTableVisible) {
+                    generateTruthTable();
+                }
+            } catch (error) {
+                resultDisplay.innerHTML = '<span class="error">สูตรไม่ถูกต้อง</span>';
+                resultDisplay.classList.add('show');
+            }
+        }
+
+        function toggleTruthTable() {
+            truthTableVisible = !truthTableVisible;
+            const truthTable = document.getElementById('truthTable');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (truthTableVisible) {
+                truthTable.classList.add('show');
+                toggleText.textContent = 'ปิดตารางค่าความจริง';
+                generateTruthTable();
+            } else {
+                truthTable.classList.remove('show');
+                toggleText.textContent = 'เปิดตารางค่าความจริง';
+            }
+        }
+
+        function extractVariables(expression) {
+            const variables = [];
+            const variablePattern = /[pqrs]/g;
+            const matches = expression.match(variablePattern);
+            if (matches) {
+                return [...new Set(matches)].sort();
+            }
+            return [];
+        }
+
+        function evaluateStepByStep(expression, values) {
+            let steps = [];
+            let current = expression;
+            
+            // แทนที่ตัวแปรด้วยค่า
+            for (const [variable, value] of Object.entries(values)) {
+                const regex = new RegExp(variable, 'g');
+                current = current.replace(regex, value ? 'T' : 'F');
+            }
+            steps.push(`แทนค่าตัวแปร: ${current}`);
+            
+            // ประเมินผลในวงเล็บซ้ายไปขวา
+            let iteration = 0;
+            while (current.includes('(') && iteration < 10) {
+                iteration++;
+                const innerMatch = current.match(/\([^()]*\)/);
+                if (innerMatch) {
+                    const innerExpr = innerMatch[0];
+                    const innerContent = innerExpr.slice(1, -1);
+                    const innerResult = evaluateSimpleExpression(innerContent);
+                    current = current.replace(innerExpr, innerResult ? 'T' : 'F');
+                    steps.push(`${innerExpr} = ${innerResult ? 'T' : 'F'} → ${current}`);
+                } else {
+                    break;
+                }
+            }
+            
+            // ประเมินผลที่เหลือ
+            while (containsOperator(current) && iteration < 20) {
+                iteration++;
+                const oldCurrent = current;
+                current = evaluateNextOperation(current);
+                if (current !== oldCurrent) {
+                    steps.push(`${oldCurrent} → ${current}`);
+                } else {
+                    break;
+                }
+            }
+            
+            return { result: current === 'T', steps: steps };
+        }
+
+        function containsOperator(expr) {
+            return /[¬∧∨→↔⊕]/.test(expr);
+        }
+
+        function evaluateNextOperation(expr) {
+            // ลำดับการดำเนินการ: ¬ → ∧ → ∨ → → → ↔ → ⊕
+            
+            // NOT (¬) - ความสำคัญสูงสุด
+            if (expr.includes('¬')) {
+                return expr.replace(/¬([TF])/g, (match, p1) => {
+                    return p1 === 'T' ? 'F' : 'T';
+                });
+            }
+            
+            // AND (∧)
+            if (expr.includes('∧')) {
+                return expr.replace(/([TF])\s*∧\s*([TF])/g, (match, p1, p2) => {
+                    return (p1 === 'T' && p2 === 'T') ? 'T' : 'F';
+                });
+            }
+            
+            // OR (∨)
+            if (expr.includes('∨')) {
+                return expr.replace(/([TF])\s*∨\s*([TF])/g, (match, p1, p2) => {
+                    return (p1 === 'T' || p2 === 'T') ? 'T' : 'F';
+                });
+            }
+            
+            // IMPLIES (→)
+            if (expr.includes('→')) {
+                return expr.replace(/([TF])\s*→\s*([TF])/g, (match, p1, p2) => {
+                    return (p1 === 'F' || p2 === 'T') ? 'T' : 'F';
+                });
+            }
+            
+            // IFF (↔)
+            if (expr.includes('↔')) {
+                return expr.replace(/([TF])\s*↔\s*([TF])/g, (match, p1, p2) => {
+                    return (p1 === p2) ? 'T' : 'F';
+                });
+            }
+            
+            // XOR (⊕)
+            if (expr.includes('⊕')) {
+                return expr.replace(/([TF])\s*⊕\s*([TF])/g, (match, p1, p2) => {
+                    return (p1 !== p2) ? 'T' : 'F';
+                });
+            }
+            
+            return expr;
+        }
+
+        function evaluateSimpleExpression(expr) {
+            let current = expr;
+            let iteration = 0;
+            
+            while (containsOperator(current) && iteration < 20) {
+                iteration++;
+                const oldCurrent = current;
+                current = evaluateNextOperation(current);
+                if (current === oldCurrent) break;
+            }
+            
+            return current === 'T';
+        }
+
+        function generateTruthTable() {
+            if (!currentExpression) {
+                document.getElementById('tableHeader').innerHTML = '';
+                document.getElementById('tableBody').innerHTML = '';
+                return;
+            }
+
+            const variables = extractVariables(currentExpression);
+            if (variables.length === 0) {
+                document.getElementById('tableHeader').innerHTML = '<th>ไม่พบตัวแปรในสูตร</th>';
+                document.getElementById('tableBody').innerHTML = '';
+                return;
+            }
+
+            // สร้างหัวตาราง
+            const header = document.getElementById('tableHeader');
+            header.innerHTML = '';
+            
+            // เพิ่มหัวคอลัมน์สำหรับตัวแปร
+            variables.forEach(variable => {
+                const th = document.createElement('th');
+                th.textContent = variable;
+                header.appendChild(th);
+            });
+            
+            // เพิ่มหัวคอลัมน์สำหรับขั้นตอน
+            const stepTh = document.createElement('th');
+            stepTh.textContent = 'ขั้นตอนการคำนวณ';
+            stepTh.style.backgroundColor = '#8e44ad';
+            header.appendChild(stepTh);
+            
+            // เพิ่มหัวคอลัมน์สำหรับผลลัพธ์
+            const resultTh = document.createElement('th');
+            resultTh.textContent = currentExpression;
+            resultTh.style.backgroundColor = '#2c3e50';
+            header.appendChild(resultTh);
+
+            // สร้างเนื้อหาตาราง
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const numRows = Math.pow(2, variables.length);
+            
+            for (let i = 0; i < numRows; i++) {
+                const row = document.createElement('tr');
+                const values = {};
+                
+                // สร้างค่าความจริงสำหรับแต่ละตัวแปร
+                for (let j = 0; j < variables.length; j++) {
+                    const value = Boolean(i & (1 << (variables.length - 1 - j)));
+                    values[variables[j]] = value;
+                    
+                    const td = document.createElement('td');
+                    td.textContent = value ? 'T' : 'F';
+                    td.className = value ? 'true' : 'false';
+                    row.appendChild(td);
+                }
+                
+                // คำนวณผลลัพธ์พร้อมขั้นตอน
+                try {
+                    const evaluation = evaluateStepByStep(currentExpression, values);
+                    
+                    // แสดงขั้นตอน
+                    const stepTd = document.createElement('td');
+                    stepTd.className = 'step-column';
+                    stepTd.innerHTML = evaluation.steps.join('<br>');
+                    row.appendChild(stepTd);
+                    
+                    // แสดงผลลัพธ์
+                    const resultTd = document.createElement('td');
+                    resultTd.textContent = evaluation.result ? 'T' : 'F';
+                    resultTd.className = evaluation.result ? 'true' : 'false';
+                    resultTd.style.fontWeight = 'bold';
+                    resultTd.style.backgroundColor = '#e8f4f8';
+                    row.appendChild(resultTd);
+                    
+                } catch (error) {
+                    const stepTd = document.createElement('td');
+                    stepTd.textContent = 'Error';
+                    stepTd.className = 'error';
+                    row.appendChild(stepTd);
+                    
+                    const resultTd = document.createElement('td');
+                    resultTd.textContent = 'Error';
+                    resultTd.className = 'error';
+                    row.appendChild(resultTd);
+                }
+                
+                tbody.appendChild(row);
+            }
+        }
+
+        // เริ่มต้นการแสดงผล
+        updateDisplay();
+    </script>
+</body>
+</html>
